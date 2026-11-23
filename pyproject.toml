@@ -13,6 +13,10 @@ dependencies = [
     "pydantic>=2.7",
     "pydantic-settings>=2.3",
     "redis>=5.0",
+    "bcrypt>=5.0.0",
+    "pyjwt>=2.15.1",
+    "email-validator>=2.4.0",
+    "python-multipart>=0.0.34",
 ]
 
 [dependency-groups]

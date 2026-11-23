@@ -4,11 +4,13 @@ from sqlalchemy import text
 from src.config import settings
 from src.database import engine
 from src.products.router import router as products_router
+from src.auth.router import router as auth_router
+
 
 app = FastAPI(title="Shop Scale")
 
 app.include_router(products_router, prefix="/api/v1")
-
+app.include_router(auth_router, prefix="/api/v1")
 
 @app.get("/health")
 async def health():

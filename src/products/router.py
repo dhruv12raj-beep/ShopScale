@@ -5,6 +5,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.database import get_db
 from src.products.models import Product
 from src.products.schemas import ProductCreate, ProductRead, ProductUpdate
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import func, select
+from src.products.schemas import ProductList
+from decimal import Decimal
+
 
 router = APIRouter(prefix="/products", tags=["products"])
 
@@ -20,10 +25,40 @@ async def get_product_or_404(product_id: int, db: AsyncSession) -> Product:
     return product
 
 
-@router.get("", response_model=list[ProductRead])
-async def list_products(db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(Product))
-    return result.scalars().all()
+@router.get("", response_model=ProductList)
+async def list_products(
+    search: str | None = Query(default=None, min_length=1, max_length=100),
+    min_price: Decimal | None = Query(default=None, ge=0),
+    max_price: Decimal | None = Query(default=None, ge=0),
+    limit: int = Query(default=20, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
+    db: AsyncSession = Depends(get_db),
+):
+    # Build a list of filters — empty at first, add only what the client sent
+    conditions = []
+    if search:
+        conditions.append(Product.name.ilike(f"%{search}%"))  # case-insensitive
+    if min_price is not None:
+        conditions.append(Product.price >= min_price)
+    if max_price is not None:
+        conditions.append(Product.price <= max_price)
+
+    # Count must use the SAME filters — otherwise "total" lies to the frontend
+    count_query = select(func.count()).select_from(Product)
+    query = select(Product).order_by(Product.id)
+    if conditions:
+        count_query = count_query.where(*conditions)
+        query = query.where(*conditions)
+
+    total = await db.scalar(count_query)
+    result = await db.execute(query.limit(limit).offset(offset))
+
+    return {
+        "items": result.scalars().all(),
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+    }
 
 
 @router.get("/{product_id}", response_model=ProductRead)

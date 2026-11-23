@@ -8,7 +8,9 @@ from src.config import settings
 engine = create_async_engine(
     settings.sqlalchemy_url,
     connect_args={"ssl": True},  # Neon requires an encrypted connection
-)
+    pool_pre_ping=True,  # helps avoid "server closed the connection unexpectedly" errors
+    pool_recycle=300,  # helps avoid "server closed the connection unexpectedly" errors
+)   
 
 AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False)
 

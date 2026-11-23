@@ -23,6 +23,7 @@ dev = [
     "httpx>=0.27",
     "ruff>=0.5",
     "testcontainers[postgres,redis]>=4.7",
+    "aiosqlite>=0.22.1",
 ]
 
 [tool.uv]
@@ -45,3 +46,4 @@ select = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+pythonpath = ["."]

@@ -11,6 +11,7 @@ from src.database import Base
 from src.products.models import Product  # noqa: F401
 from src.products.models import Product  # noqa: F401
 from src.auth.models import User  # noqa: F401
+from src.cart.models import CartItem  # noqa: F401
 
 
 # this is the Alembic Config object, which provides

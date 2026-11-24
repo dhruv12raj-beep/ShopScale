@@ -32,7 +32,10 @@ async def client(db_session):
     """An HTTP client that calls our app directly — no server, no port, no Neon."""
 
     async def override_get_db():
-        yield db_session  # swap the real database for the test database
+        try:
+            yield db_session
+        finally:
+            await db_session.rollback()  # swap the real database for the test database
 
     app.dependency_overrides[get_db] = override_get_db
     async with AsyncClient(

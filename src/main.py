@@ -6,14 +6,14 @@ from src.database import engine
 from src.products.router import router as products_router
 from src.auth.router import router as auth_router
 from src.cart.router import router as cart_router
-
+from src.orders.router import router as orders_router
 
 app = FastAPI(title="Shop Scale")
 
 app.include_router(products_router, prefix="/api/v1")
 app.include_router(auth_router, prefix="/api/v1")
 app.include_router(cart_router, prefix="/api/v1")
-
+app.include_router(orders_router, prefix="/api/v1")
 
 @app.get("/health")
 async def health():

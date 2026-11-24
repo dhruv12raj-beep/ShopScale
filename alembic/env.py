@@ -12,7 +12,7 @@ from src.products.models import Product  # noqa: F401
 from src.products.models import Product  # noqa: F401
 from src.auth.models import User  # noqa: F401
 from src.cart.models import CartItem  # noqa: F401
-
+from src.orders.models import Order, OrderItem  # noqa: F401
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -78,6 +78,7 @@ async def run_async_migrations() -> None:
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
         connect_args={"ssl": True},  # Neon requires an encrypted connection
+        
     )
 
     async with connectable.connect() as connection:

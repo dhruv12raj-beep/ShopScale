@@ -22,4 +22,9 @@ class Base(DeclarativeBase):
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """Gives each request its own database session, and cleans it up after."""
     async with AsyncSessionLocal() as session:
-        yield session
+        try:
+            yield session
+            await session.commit()  # commit if no exceptions
+        except Exception:
+            await session.rollback()  # rollback if there were exceptions
+            raise

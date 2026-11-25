@@ -13,6 +13,7 @@ class UserRead(BaseModel):
 
     id: int
     email: EmailStr
+    is_admin: bool
     created_at: datetime
 
 

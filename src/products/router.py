@@ -1,13 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import func, select 
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from src.database import get_db
 from src.products.models import Product
 from src.products.schemas import ProductCreate, ProductRead, ProductUpdate
-from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import func, select
 from src.products.schemas import ProductList
+from src.auth.models import User
+from src.auth.security import require_admin
 from decimal import Decimal
 
 
@@ -67,7 +67,7 @@ async def get_product(product_id: int, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("", response_model=ProductRead, status_code=status.HTTP_201_CREATED)
-async def create_product(product_in: ProductCreate, db: AsyncSession = Depends(get_db)):
+async def create_product(product_in: ProductCreate, admin: User = Depends(require_admin),  db: AsyncSession = Depends(get_db)):
     product = Product(**product_in.model_dump())
     db.add(product)
     await db.commit()
@@ -79,6 +79,7 @@ async def create_product(product_in: ProductCreate, db: AsyncSession = Depends(g
 async def update_product(
     product_id: int,
     product_in: ProductUpdate,
+    admin: User = Depends(require_admin),
     db: AsyncSession = Depends(get_db),
 ):
     product = await get_product_or_404(product_id, db)
@@ -91,7 +92,7 @@ async def update_product(
 
 
 @router.delete("/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_product(product_id: int, db: AsyncSession = Depends(get_db)):
+async def delete_product(product_id: int,admin: User = Depends(require_admin), db: AsyncSession = Depends(get_db)):
     product = await get_product_or_404(product_id, db)
     await db.delete(product)
     await db.commit()

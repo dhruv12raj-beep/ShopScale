@@ -13,6 +13,7 @@ from src.auth.security import (
 )
 from src.database import get_db
 
+
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 

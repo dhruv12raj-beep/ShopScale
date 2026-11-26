@@ -3,16 +3,24 @@ from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from src.categories.schemas import CategoryRead
+
 
 class ProductCreate(BaseModel):
-    """What the client must send to create a product."""
     name: str = Field(min_length=1, max_length=255)
-    price: Decimal = Field(gt=0, max_digits=10, decimal_places=2)
-    stock: int = Field(ge=0, default=0)
+    price: Decimal = Field(gt=0)
+    stock: int = Field(ge=0)
+    category_ids: list[int] = Field(default_factory=list)
+
+
+class ProductUpdate(BaseModel):
+    name: str | None = Field(default=None, min_length=1, max_length=255)
+    price: Decimal | None = Field(default=None, gt=0)
+    stock: int | None = Field(default=None, ge=0)
+    category_ids: list[int] | None = None
 
 
 class ProductRead(BaseModel):
-    """What the API sends back about a product."""
     model_config = ConfigDict(from_attributes=True)
 
     id: int
@@ -20,16 +28,9 @@ class ProductRead(BaseModel):
     price: Decimal
     stock: int
     created_at: datetime
+    categories: list[CategoryRead] = Field(default_factory=list)
 
-class ProductUpdate(BaseModel):
-    """For updates — all fields optional; only sent fields get changed."""
-    name: str | None = Field(default=None, min_length=1, max_length=255)
-    price: Decimal | None = Field(default=None, gt=0, max_digits=10, decimal_places=2)
-    stock: int | None = Field(default=None, ge=0)
 
 class ProductList(BaseModel):
-    """A single page of products, plus the info a frontend needs to page through them."""
     items: list[ProductRead]
-    total: int      # how many products exist in total
-    limit: int      # page size
-    offset: int     # how many were skipped
+    total: int
